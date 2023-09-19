@@ -1094,8 +1094,9 @@ static int hugetlbfs_migrate_folio(struct address_space *mapping,
 	int rc;
 
 	rc = migrate_huge_page_move_mapping(mapping, dst, src);
-	if (rc != MIGRATEPAGE_SUCCESS)
+	if (rc != MIGRATEPAGE_SUCCESS) {
 		return rc;
+	}
 
 	if (hugetlb_page_subpool(&src->page)) {
 		hugetlb_set_page_subpool(&dst->page,

@@ -1208,4 +1208,10 @@ bool want_pmd_share(struct vm_area_struct *vma, unsigned long addr);
 #define flush_hugetlb_tlb_range(vma, addr, end)	flush_tlb_range(vma, addr, end)
 #endif
 
+typedef struct page *(*dequeue_hook_t)(struct hstate *h, int nid);
+void set_dequeue_hook(dequeue_hook_t hook);
+
+typedef struct page *(*enqueue_hook_t)(struct hstate *h, struct page *page);
+void set_enqueue_hook(enqueue_hook_t hook);
+
 #endif /* _LINUX_HUGETLB_H */

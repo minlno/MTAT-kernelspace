@@ -1440,6 +1440,18 @@ void folio_putback_lru(struct folio *folio)
 	folio_put(folio);		/* drop ref from isolate */
 }
 
+void mtat_folio_putback_lru(struct folio *folio)
+{
+	folio_putback_lru(folio);
+}
+EXPORT_SYMBOL(mtat_folio_putback_lru);
+
+int mtat_folio_isolate_lru(struct folio *folio)
+{
+	return folio_isolate_lru(folio);
+}
+EXPORT_SYMBOL(mtat_folio_isolate_lru);
+
 enum folio_references {
 	FOLIOREF_RECLAIM,
 	FOLIOREF_RECLAIM_CLEAN,

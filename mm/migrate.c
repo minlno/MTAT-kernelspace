@@ -937,9 +937,10 @@ static int move_to_new_folio(struct folio *dst, struct folio *src,
 	if (likely(is_lru)) {
 		struct address_space *mapping = folio_mapping(src);
 
-		if (!mapping)
+		if (!mapping) {
 			rc = migrate_folio(mapping, dst, src, mode);
-		else if (mapping->a_ops->migrate_folio)
+		}
+		else if (mapping->a_ops->migrate_folio) {
 			/*
 			 * Most folios have a mapping and most filesystems
 			 * provide a migrate_folio callback. Anonymous folios
@@ -949,8 +950,10 @@ static int move_to_new_folio(struct folio *dst, struct folio *src,
 			 */
 			rc = mapping->a_ops->migrate_folio(mapping, dst, src,
 								mode);
-		else
+		}
+		else {
 			rc = fallback_migrate_folio(mapping, dst, src, mode);
+		}
 	} else {
 		const struct movable_operations *mops;
 
@@ -1308,8 +1311,9 @@ static int unmap_and_move_huge_page(new_page_t get_new_page,
 	if (folio_test_anon(src))
 		anon_vma = folio_get_anon_vma(src);
 
-	if (unlikely(!folio_trylock(dst)))
+	if (unlikely(!folio_trylock(dst))) {
 		goto put_anon;
+	}
 
 	if (folio_mapped(src)) {
 		enum ttu_flags ttu = 0;
@@ -1322,8 +1326,9 @@ static int unmap_and_move_huge_page(new_page_t get_new_page,
 			 * to let lower levels know we have taken the lock.
 			 */
 			mapping = hugetlb_page_mapping_lock_write(hpage);
-			if (unlikely(!mapping))
+			if (unlikely(!mapping)) {
 				goto unlock_put_anon;
+			}
 
 			ttu = TTU_RMAP_LOCKED;
 		}
@@ -1604,6 +1609,7 @@ out:
 
 	return rc;
 }
+EXPORT_SYMBOL(migrate_pages);
 
 struct page *alloc_migration_target(struct page *page, unsigned long private)
 {

@@ -48,8 +48,11 @@
 #include "hugetlb_vmemmap.h"
 
 int hugetlb_max_hstate __read_mostly;
+EXPORT_SYMBOL(hugetlb_max_hstate);
 unsigned int default_hstate_idx;
+EXPORT_SYMBOL(default_hstate_idx);
 struct hstate hstates[HUGE_MAX_HSTATE];
+EXPORT_SYMBOL(hstates);
 
 #ifdef CONFIG_CMA
 static struct cma *hugetlb_cma[MAX_NUMNODES];
@@ -1275,9 +1278,21 @@ static bool vma_has_reserves(struct vm_area_struct *vma, long chg)
 	return false;
 }
 
+static enqueue_hook_t enqueue_hook = NULL;
+void set_enqueue_hook(enqueue_hook_t hook)
+{
+	enqueue_hook = hook;
+}
+EXPORT_SYMBOL(set_enqueue_hook);
+
 static void enqueue_huge_page(struct hstate *h, struct page *page)
 {
 	int nid = page_to_nid(page);
+
+	if (enqueue_hook) {
+		enqueue_hook(h, page);
+		return;
+	}
 
 	lockdep_assert_held(&hugetlb_lock);
 	VM_BUG_ON_PAGE(page_count(page), page);
@@ -1288,10 +1303,20 @@ static void enqueue_huge_page(struct hstate *h, struct page *page)
 	SetHPageFreed(page);
 }
 
+static dequeue_hook_t dequeue_hook = NULL;
+void set_dequeue_hook(dequeue_hook_t hook)
+{
+	dequeue_hook = hook;
+}
+EXPORT_SYMBOL(set_dequeue_hook);
+
 static struct page *dequeue_huge_page_node_exact(struct hstate *h, int nid)
 {
 	struct page *page;
 	bool pin = !!(current->flags & PF_MEMALLOC_PIN);
+
+	if (dequeue_hook)
+		return dequeue_hook(h, nid);
 
 	lockdep_assert_held(&hugetlb_lock);
 	list_for_each_entry(page, &h->hugepage_freelists[nid], lru) {
@@ -1871,6 +1896,7 @@ struct hstate *size_to_hstate(unsigned long size)
 	}
 	return NULL;
 }
+EXPORT_SYMBOL(size_to_hstate);
 
 void free_huge_page(struct page *page)
 {
@@ -7369,6 +7395,7 @@ unlock:
 	spin_unlock_irq(&hugetlb_lock);
 	return ret;
 }
+EXPORT_SYMBOL(isolate_hugetlb);
 
 int get_hwpoison_huge_page(struct page *page, bool *hugetlb)
 {
@@ -7407,6 +7434,7 @@ void putback_active_hugepage(struct page *page)
 	spin_unlock_irq(&hugetlb_lock);
 	put_page(page);
 }
+EXPORT_SYMBOL(putback_active_hugepage);
 
 void move_hugetlb_state(struct page *oldpage, struct page *newpage, int reason)
 {
