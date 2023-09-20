@@ -23,6 +23,7 @@
 #include <linux/processor.h>
 #include <linux/sizes.h>
 #include <linux/compat.h>
+#include <linux/highmem.h>
 
 #include <linux/uaccess.h>
 
@@ -850,6 +851,10 @@ void folio_copy(struct folio *dst, struct folio *src)
 {
 	long i = 0;
 	long nr = folio_nr_pages(src);
+	int rc = copy_page_multithread(folio_page(dst, 0), folio_page(src, 0), (int)nr);
+
+	if (!rc)
+		return;
 
 	for (;;) {
 		copy_highpage(folio_page(dst, i), folio_page(src, i));
