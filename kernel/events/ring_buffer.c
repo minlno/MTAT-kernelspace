@@ -850,6 +850,7 @@ fail_user_page:
 fail:
 	return NULL;
 }
+EXPORT_SYMBOL_GPL(rb_alloc);
 
 void rb_free(struct perf_buffer *rb)
 {
@@ -940,6 +941,7 @@ fail_all_buf:
 fail:
 	return NULL;
 }
+EXPORT_SYMBOL_GPL(rb_alloc);
 
 #endif
 

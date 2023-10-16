@@ -6057,6 +6057,7 @@ void ring_buffer_put(struct perf_buffer *rb)
 
 	call_rcu(&rb->rcu_head, rb_free_rcu);
 }
+EXPORT_SYMBOL_GPL(ring_buffer_put);
 
 static void perf_mmap_open(struct vm_area_struct *vma)
 {
