@@ -3,7 +3,7 @@ VERSION = 6
 PATCHLEVEL = 1
 SUBLEVEL = 53
 EXTRAVERSION =
-NAME = Curry Ramen
+NAME = Minho
 
 # *DOCUMENTATION*
 # To see a list of typical targets execute "make help"
