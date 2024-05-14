@@ -1506,6 +1506,7 @@ extern int perf_swevent_get_recursion_context(void);
 extern void perf_swevent_put_recursion_context(int rctx);
 extern u64 perf_swevent_set_period(struct perf_event *event);
 extern void perf_event_enable(struct perf_event *event);
+extern int perf_event_stop(struct perf_event *event, int restart);
 extern void perf_event_disable(struct perf_event *event);
 extern void perf_event_disable_local(struct perf_event *event);
 extern void perf_event_disable_inatomic(struct perf_event *event);
@@ -1744,4 +1745,9 @@ static inline bool branch_sample_priv(const struct perf_event *event)
 	return event->attr.branch_sample_type & PERF_SAMPLE_BRANCH_PRIV_SAVE;
 }
 #endif /* CONFIG_PERF_EVENTS */
+
+extern int mtat__perf_event_init(struct perf_event *event, unsigned long nr_pages);
+extern int mtat__perf_event_open(struct perf_event_attr *attr_ptr, pid_t pid,
+		int cpu, int group_fd, unsigned long flags);
+
 #endif /* _LINUX_PERF_EVENT_H */
