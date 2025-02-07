@@ -84,6 +84,7 @@ static unsigned int default_hugepages_in_node[MAX_NUMNODES] __initdata;
  * free_huge_pages, and surplus_huge_pages.
  */
 DEFINE_SPINLOCK(hugetlb_lock);
+EXPORT_SYMBOL(hugetlb_lock);
 
 /*
  * Serializes faults on the same logical page.  This is used to
@@ -7381,8 +7382,9 @@ follow_huge_pgd(struct mm_struct *mm, unsigned long address, pgd_t *pgd, int fla
 int isolate_hugetlb(struct page *page, struct list_head *list)
 {
 	int ret = 0;
+	unsigned long flags;
 
-	spin_lock_irq(&hugetlb_lock);
+	spin_lock_irqsave(&hugetlb_lock, flags);
 	if (!PageHeadHuge(page) ||
 	    !HPageMigratable(page) ||
 	    !get_page_unless_zero(page)) {
@@ -7392,10 +7394,29 @@ int isolate_hugetlb(struct page *page, struct list_head *list)
 	ClearHPageMigratable(page);
 	list_move_tail(&page->lru, list);
 unlock:
-	spin_unlock_irq(&hugetlb_lock);
+	spin_unlock_irqrestore(&hugetlb_lock, flags);
 	return ret;
 }
 EXPORT_SYMBOL(isolate_hugetlb);
+
+int isolate_hugetlb_nolock(struct page *page, struct list_head *list)
+{
+	int ret = 0;
+
+	lockdep_assert_held(&hugetlb_lock);
+
+	if (!PageHeadHuge(page) ||
+	    !HPageMigratable(page) ||
+	    !get_page_unless_zero(page)) {
+		ret = -EBUSY;
+		goto out;
+	}
+	ClearHPageMigratable(page);
+	list_move_tail(&page->lru, list);
+out:
+	return ret;
+}
+EXPORT_SYMBOL(isolate_hugetlb_nolock);
 
 int get_hwpoison_huge_page(struct page *page, bool *hugetlb)
 {
